@@ -21,21 +21,26 @@ def client_socket(sock, msg, mailFrom, rcpt):
     print(received_data)
     print("data--")
 
-    msg = check_message(msg)
     sock.send(msg.encode())
-    received_msg = ascii_to_base64(sock.recv(1024))
+    received_msg = sock.recv(1024).decode()
     print(received_msg)
     print("msg--")
 
-    dot = "."
+    end = "<CR><LF>.<CR><LF>\r\n"
+    sock.send(end.encode())
+    received_end = sock.recv(1024).decode()
+    print(received_end)
+    print("crlf--")
+
+    dot = ".\r\n"
     sock.send(dot.encode())
-    received_dot = ascii_to_base64(sock.recv(1024))
+    received_dot = sock.recv(1024).decode()
     print(received_dot)
     print("dot--")
 
     quit = "QUIT\r\n"
     sock.send(quit.encode())
-    received_quit = ascii_to_base64(sock.recv(1024))
+    received_quit = sock.recv(1024).decode()
     print(received_quit)
 
     sock.close()
@@ -58,8 +63,8 @@ def login(sock, username, password, mail_server):
     cred = base64.b64encode(("\x00"+username + "\x00"+password).encode())
     authMsg = authPlain.encode() + cred + "\r\n".encode()
     sock.send(authMsg)
-    received_auth = base64_to_ascii(sock.recv(1024))
-    print("send login details to server: " + authMsg)
+    received_auth = sock.recv(1024).decode()
+    print("send login details to server: ", received_auth)
 
 
 if __name__ == '__main__':
