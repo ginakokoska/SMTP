@@ -32,23 +32,33 @@ def interpret_response(data):
 if __name__ == '__main__':
 
     calc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = ('127.0.0.1', 7)
+    calc_socket.settimeout(15)
+    server_address = ('127.0.0.1', 6969)
     calc_socket.connect(server_address)
-    query = formatForClient(0, "summe__", [1, 2, 3])
+    i = 0
 
-    try:
-        print(query)
-        calc_socket.sendall(query[0])
-        calc_socket.sendall(query[1])
-        data = calc_socket.recv(8)
-        print("received", data)
-        unpacked_data = interpret_response(data)
+    while True:
+        try:
+            query = formatForClient(i, "summe__", [1, 2, 3])
+            i += 1
+            print(query)
+            calc_socket.sendall(query[0])
+            calc_socket.sendall(query[1])
+            data = calc_socket.recv(8)
+            print("received", data)
+            unpacked_data = interpret_response(data)
 
-        print("unpacked:", unpacked_data)
-        hostname = socket.gethostname()
-        IPAddr, port = calc_socket.getpeername()
-        print("Your computer name is:", hostname)
-        print("Your ip address is:", IPAddr)
-        print("Your socket port is:", port)
-    finally:
-        calc_socket.close()
+            print("unpacked:", unpacked_data)
+            hostname = socket.gethostname()
+            IPAddr, port = calc_socket.getpeername()
+            print("Your computer name is:", hostname)
+            print("Your ip address is:", IPAddr)
+            print("Your socket port is:", port)
+            ans = input('\nDo you want to continue? (y/n):')
+            if ans == 'y':
+                continue
+            else:
+                break
+        except TimeoutError:
+            calc_socket.close()
+    calc_socket.close()

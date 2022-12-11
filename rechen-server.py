@@ -1,36 +1,8 @@
 import socket
 import struct
 import math
-import threading
 
-def threaded(c):
-    connection, client_address = streamSocket.accept()
 
-    try:
-        n_data = connection.recv(unpacker_n.size)
-        print("received n:", n_data)
-        n = unpacker_n.unpack(n_data)[0]
-        print("unpacked n:", n)
-        unpacker_str = 'I 7s B'
-        for i in range(n):
-            unpacker_str += ' i'
-        unpacker = struct.Struct(unpacker_str)
-
-        data = connection.recv(unpacker.size)
-        print("received:", data)
-        unpacked_data = unpacker.unpack(data)
-        print("unpacked:", unpacked_data)
-        numbers = unpacked_data[-n:]
-        print("numbers:", numbers)
-        args = unpacked_data[0:len(unpacked_data) - n]
-        msg_id = args[0]
-        operation = args[1]
-        print("operation:", operation)
-        result = calculate(operation, numbers)
-        print("msg_id:", msg_id)
-        print("result:", result)
-        response = struct.pack('I i', msg_id, result)
-        connection.send(response)
 def calculate(op, z):
 
     match op:
@@ -77,7 +49,38 @@ if __name__ == '__main__':
     unpacker_n = struct.Struct('B')
 
     while True:
+        connection, client_address = streamSocket.accept()
 
+        try:
+            n_data = connection.recv(unpacker_n.size)
+            print("received n:", n_data)
+            n = unpacker_n.unpack(n_data)[0]
+            print("unpacked n:", n)
+            unpacker_str = 'I 7s B'
+            for i in range(n):
+                unpacker_str += ' i'
+            unpacker = struct.Struct(unpacker_str)
+
+            data = connection.recv(unpacker.size)
+            print("received:", data)
+            unpacked_data = unpacker.unpack(data)
+            print("unpacked:", unpacked_data)
+            numbers = unpacked_data[-n:]
+            print("numbers:", numbers)
+            args = unpacked_data[0:len(unpacked_data)-n]
+            msg_id = args[0]
+            operation = args[1]
+            print("operation:", operation)
+            result = calculate(operation, numbers)
+            print("msg_id:", msg_id)
+            print("result:", result)
+            response = struct.pack('I i', msg_id, result)
+            connection.send(response)
+            # streamSocket.sendto(response, client_address)
+
+        finally:
+            connection.close()
+            exit()
 
 # 1.
 # n: client -> server
